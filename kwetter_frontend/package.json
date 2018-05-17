@@ -2,9 +2,13 @@
   "name": "kwetter_frontend",
   "version": "0.1.0",
   "private": true,
+  "proxy": "http://localhost:8080/1-1.0-SNAPSHOT/api",
   "dependencies": {
+    "@types/prop-types": "^15.5.2",
+    "office-ui-fabric-react": "^5.103.0",
     "react": "^16.3.2",
     "react-dom": "^16.3.2",
+    "react-router-dom": "^4.2.2",
     "react-scripts-ts": "2.16.0"
   },
   "scripts": {

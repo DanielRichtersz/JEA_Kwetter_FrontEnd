@@ -12,10 +12,10 @@ export default class HttpRequest extends React.Component<IHttpRequestProps, IHtt
         return (
             <div id="HttpRequestContainer">
                 <button
-                    onClick={() => this.getRequest("localhost:8080/1-1.0-SNAPSHOT/api/users/test")}>
+                    onClick={() => this.getRequest("/users/test")}>
                     Send request <br/>
                 </button> <br/>
-                {this.state.jsonReceived}
+                <p>{this.state.jsonReceived.toString()}</p>
             </div>
         )
     }
@@ -27,7 +27,7 @@ export default class HttpRequest extends React.Component<IHttpRequestProps, IHtt
         };
     }
 
-    getRequest(url: string) : void {
+    getRequest(url: string) {
         fetch(url).then(function(response) {
             return response.json();
         })

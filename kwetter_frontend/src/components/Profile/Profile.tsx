@@ -6,13 +6,16 @@ import Timeline from "../Timeline/Timeline";
 // Subcomponents
 import NewTweet from "../../subcomponents/NewTweet/NewTweet";
 
+// Entities
+import Tweet from '../../entities/Tweet';
+
 
 export interface IProfileProps {
 
 }
 
 export interface IProfileStates {
-    timeline : Array<string>;
+    timeline : Array<Tweet>;
 }
 
 export default class Profile extends React.Component<IProfileProps, IProfileStates> {
@@ -39,18 +42,19 @@ export default class Profile extends React.Component<IProfileProps, IProfileStat
 
     constructor(props: IProfileProps) {
         super(props);
-        this.state = { timeline : new Array<string>() };
+        this.state = { timeline : new Array<Tweet>() };
     }
 
-    private newTweetAdded(tweet: string) : void {
+    private newTweetAdded(tweet: Tweet) : void {
         let newTweetArray = this.state.timeline;
         newTweetArray.push(tweet)
         this.setState({timeline : newTweetArray});
     }
 
-    private setTimeline(newTimeline : Array<string>) : void {
-        console.log("Settimeline newtimeline: ", newTimeline);
+    private setTimeline(newTimeline : Array<Tweet>) : boolean {
+        console.log("Profile - Settimeline newtimeline: ", newTimeline);
         this.setState({timeline: newTimeline});
+        return true;
     }
 
 

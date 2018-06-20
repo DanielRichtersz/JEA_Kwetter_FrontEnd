@@ -1,0 +1,23 @@
+.tweetContainer {
+    text-align: center;
+    margin: 20px;
+    font-size: 16px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+
+  .tweetTitleDiv {
+      text-align: center;
+      margin:10px;
+      height:20px;
+  }
+
+  .tweetContentDiv{
+      text-align: left;
+      margin:10px;
+      height:100%;
+  }
+  .tweetLikesDiv{
+      text-align: left;
+      margin:5px;
+      font-size:12px;
+  }

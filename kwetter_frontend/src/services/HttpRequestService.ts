@@ -43,7 +43,7 @@ export default class HttpRequestService {
             } else if (xmlHttp.readyState === 4 && xmlHttp.status !== 200) {
                 // If the request fails
                 // Make for correct handling
-                callback(xmlHttp, false);
+                callback(xmlHttp.statusText, false, xmlHttp);
             }
         }
         xmlHttp.open(type, url, true);

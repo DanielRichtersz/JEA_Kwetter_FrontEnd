@@ -7,9 +7,17 @@ import { DefaultButton } from 'office-ui-fabric-react/lib/Button';
 import CookiesService from '../../services/CookiesService';
 import HttpRequestService from '../../services/HttpRequestService';
 
+// Subcomponents
+import TweetComponent from '../../subcomponents/Tweet/TweetComponent';
+
+// Entities
+import Tweet from '../../entities/Tweet';
+import Like from '../../entities/Like';
+import User from '../../entities/User';
+
 export interface ITimelineProps {
-    timeline: Array<string>;
-    setTimeline: (timeline : Array<string>) => void;
+    timeline: Array<Tweet>;
+    setTimeline: (timeline: Array<Tweet>) => boolean;
 }
 
 export interface ITimelineStates {
@@ -22,36 +30,47 @@ export interface ITimelineStates {
 export default class Timeline extends React.Component<ITimelineProps, ITimelineStates> {
 
     public render(): React.ReactElement<ITimelineProps> {
+        const elements: JSX.Element[] = [];
+        if (this.props.timeline.length > 0) {
+            this.props.timeline.forEach((item, index) => {
+                elements.push(
+                    <TweetComponent
+                        tweet={item}
+                        key={index}
+                    />
+                );
+            });
+        }
+
         return (
             <div id="TimelineContainer" className="ms-Grid-row">
                 <div className="ms-Grid-col ms-sm12 ms-md12 ms-lg12">
                     {this.state.loadingMessage}
                 </div>
                 <div className="ms-Grid-col ms-sm12 ms-md12 ms-lg12">
-                    {this.props.timeline}
+                    {elements}
                 </div>
                 <div className="ms-Grid-col ms-sm12 ms-md12 ms-lg12">
                     <DefaultButton
                         text="Reload timeline"
                         onClick={() => this.loadTimeline(
-                            this.state.messagesToLoadStartDate, 
+                            this.state.messagesToLoadStartDate,
                             this.state.messagesToLoadEndDate)} />
                 </div>
-
             </div>
         )
     }
 
     constructor(props: ITimelineProps) {
         super(props);
+        let messagesToLoadStartDate = new Date();
+        messagesToLoadStartDate.setDate(messagesToLoadStartDate.getDate() - 7);
+
         this.state = {
             loadingMessage: "Loading timeline",
-            messagesToLoadStartDate: String(Date.now()),
-            messagesToLoadEndDate: String(Date.now() - 7)
+            messagesToLoadStartDate: String(messagesToLoadStartDate.valueOf()),
+            messagesToLoadEndDate: String(Date.now())
         };
-
-        console.log("Timeline.messagesstartdate: " + this.state.messagesToLoadStartDate);
-        console.log("Timeline.messagesenddate: " + this.state.messagesToLoadEndDate);
 
         this.loadTimeline(this.state.messagesToLoadStartDate, this.state.messagesToLoadEndDate);
     }
@@ -73,29 +92,59 @@ export default class Timeline extends React.Component<ITimelineProps, ITimelineS
         );
     }
 
-    private loadTimelineCallback(responseText: string, requestSucceeded: boolean, xmlHttp: object) {
+    private loadTimelineCallback(responseText: string,
+        requestSucceeded: boolean,
+        xmlHttp: object) {
         console.log("Loadtimeline callback");
         console.log("responseText: ", responseText);
         console.log("Requestsucceeded: ", requestSucceeded);
         console.log("xmlHttp: ", xmlHttp);
-        this.setState({ loadingMessage: "Timeline loaded" });
-        // Read out the received timeline
 
-        let newTimeline = new Array<string>();
-        newTimeline.push("Tweet 1", "Tweet 2", "Tweet 3");
-        
-        // Set timeline with loaded data
-        this.props.setTimeline(newTimeline);
-        console.log("loadTimelineCallback timeline is now: ", this.props.timeline);
-    }
+        let timeline: Array<Tweet> = new Array<Tweet>();
 
-    public processNewTweets(tweets: Array<string>) {
-        for (let newTweet of tweets) {
-            let newTimeline: Array<string> = this.props.timeline;
-            newTimeline.push(newTweet);
-            this.props.setTimeline(newTimeline);
+        try {
+            // The received timeline (List of tweets)
+            // Parse the timeline
+            let receivedTimeline = JSON.parse(responseText);
+            // For each tweet, create a Tweet entity
+            for (let tweet of receivedTimeline) {
+
+                // Parse owner
+                let owner: User = new User(
+                    tweet.owner.firstName,
+                    tweet.owner.lastName,
+                    tweet.owner.email.email,
+                    tweet.owner.id);
+
+                // Parse likes
+                let likes: Array<Like> = new Array<Like>();
+                for (let like of tweet.likes) {
+                    let dateLiked: Date = new Date(like.dateLiked);
+                    let newLike: Like = new Like(like.userId, like.tweetId, dateLiked, like.id);
+                    likes.push(newLike);
+                }
+
+                // Parse dateCreated
+                let dateCreated: Date = new Date(tweet.dateCreatedUTC);
+
+                // Create tweet
+                let newTweet: Tweet = new Tweet(
+                    tweet.id,
+                    dateCreated,
+                    owner,
+                    likes,
+                    tweet.message);
+                console.log("Tweet created: ", newTweet);
+                timeline.push(newTweet);
+            }
+            // Set timeline with loaded data
+            if (this.props.setTimeline(timeline)) {
+                this.setState({ loadingMessage: "Timeline loaded" });
+            }
         }
-        console.log("Timeline is now: ", this.props.timeline);
+        catch (e) {
+            console.log(e);
+            this.setState({ loadingMessage: "Could not load timeline" });
+        }
     }
-
 }

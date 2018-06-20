@@ -1,14 +1,18 @@
 import * as React from 'react';
 
+// Components
 import Login from './Login/Login';
-import HttpRequest from './HttpRequest';
+import Profile from './Profile/Profile'
+
+// Service
+import CookiesService from '../services/CookiesService';
 
 export interface IHomeProps {
 
 }
 
 export interface IHomeStates {
-    showRequestButton: boolean;
+    loggedIn: boolean;
 }
 
 export default class Home extends React.Component<IHomeProps, IHomeStates> {
@@ -17,15 +21,9 @@ export default class Home extends React.Component<IHomeProps, IHomeStates> {
         return (
             <div className="ms-Grid">
                 <div className="ms-Grid-row">
-                    <div className="ms-Grid-col ms-sm12 ms-md12 ms-lg12">
-                        HomeContainerdiv
-                        <button onClick={() => { this.setState({ showRequestButton: !this.state.showRequestButton }) }}>
-                            Show request
-                        </button>
-                    </div>
-                </div>
-                <div className="ms-Grid-row">
-                    {this.state.showRequestButton == false ? <Login /> : <HttpRequest />}
+                    {!this.state.loggedIn ?
+                        <Login loggedIn={this.loggedInCookie.bind(this)} /> :
+                        <Profile />}
                 </div>
             </div>
         )
@@ -33,7 +31,11 @@ export default class Home extends React.Component<IHomeProps, IHomeStates> {
 
     constructor(props: IHomeProps) {
         super(props);
-        this.state = { showRequestButton: false };
+        this.state = { loggedIn: false };
+    }
+
+    private loggedInCookie(): void {
+        this.setState({ loggedIn: CookiesService.LoggedInCheck() })
     }
 
 }
